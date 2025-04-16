@@ -167,7 +167,7 @@ int CalculateTotalScore()
     return total;
 }
 
-void delete()
+void deleteObject()
 {
 
     for (int i = 0; i < objFrames.size(); ++i) 
@@ -277,7 +277,7 @@ int i =1 ;
 
     cout<<"All 10 frames added"<<"\t"<<"total =  "<<total<<endl;
 
-objBowlingGame.delete();
+objBowlingGame.deleteObject();
 
 
     return 0;
