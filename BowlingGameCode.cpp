@@ -28,7 +28,10 @@ class IFrame
     {
         return iFrameTotalScore;
     }
-    virtual ~IFrame() = default;
+    virtual ~IFrame()
+{
+cout <<"delete"<<endl;
+}
 };
 
 
@@ -164,6 +167,14 @@ int CalculateTotalScore()
     return total;
 }
 
+void delete()
+{
+
+    for (int i = 0; i < objFrames.size(); ++i) 
+    {
+        delete objFrames[i];
+    }
+}
     virtual ~BowlingGame() = default;
     
     // bool isSpare()
@@ -265,6 +276,9 @@ int i =1 ;
         
 
     cout<<"All 10 frames added"<<"\t"<<"total =  "<<total<<endl;
+
+objBowlingGame.delete();
+
 
     return 0;
 }
