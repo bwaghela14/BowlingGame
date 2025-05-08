@@ -1,0 +1,2 @@
+ModeOfGame = App
+MaxBowlingFrame = 10
