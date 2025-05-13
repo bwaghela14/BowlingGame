@@ -31,3 +31,34 @@ void InputValidator::ValidateActualFrameCreated(int FrameSize,int ConfigFrameSiz
 	}
 }
 
+int InputValidator::ReadIntegerInput(const std::string& prompt,int retryNonNumericCount,int index)
+{
+    int value;
+
+    while (retryNonNumericCount < 5)
+    {
+        std::cout << prompt<<" "<<index<<" : ";
+        std::cin >> value;
+
+        if (std::cin.fail()) 
+        {
+            std::cin.clear(); 
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); 
+            retryNonNumericCount++;
+            std::cout << "Invalid input. Please enter a number only.\n";
+        }
+        else 
+        {
+            return value;
+        }
+    }
+    if (retryNonNumericCount == 5)
+    {
+        throw NonNumericException("Too many invalid attempts for non numeric input. Exiting the game.\n");
+    }
+}
+
+//int InputValidator::ValidateSecondRoll(int pin)
+//{
+//
+//}

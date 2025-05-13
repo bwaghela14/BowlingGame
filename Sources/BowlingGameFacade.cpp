@@ -13,11 +13,12 @@ void BowlingGameFacade::play()
 
 	std::vector<std::vector<int>>objRolls;
 
-	int run = 0;
+	int run = 0,GameNumber = 0;
 
 	do
 	{
-
+		GameNumber++;
+		std::cout << "***************LOADING GAME NUMBER    " << GameNumber <<" ****************" <<std::endl;
 	//Taking input
 	UserInput objInput;
 	objInput.InputRolls(objRolls);

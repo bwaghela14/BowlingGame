@@ -1,10 +1,10 @@
 #include "UserInput.h"
 #include "ConfigReader.h"
-
+#include "NonNumericException.h"
 
 UserInput::UserInput()
 {
-	//std::cout << "User input cstr Called" << std::endl;
+    //std::cout << "User input cstr Called" << std::endl;
 }
 
 
@@ -24,9 +24,9 @@ void UserInput::InputRolls(std::vector<std::vector<int>>& objRolls)
         std::cout << "iMaxFrameValue=" << iMaxFrameValue << std::endl;
         InputValidator::ValidateFrameIndexReadFromConfig(iMaxFrameValue);
     }
-    catch(const ExceptionRolls& ex)
+    catch (const ExceptionRolls& ex)
     {
-        std::cerr << "Frame value greater than 10 ,putting frame value to 10 manually"<< std::endl;
+        std::cerr << "Frame value greater than 10 ,putting frame value to 10 manually" << std::endl;
         iMaxFrameValue = 10;
     }
 
@@ -40,9 +40,7 @@ void UserInput::InputRolls(std::vector<std::vector<int>>& objRolls)
             {
                 if (i <= 9)
                 {
-
-                    std::cout << "Enter first Roll Score" << std::endl;
-                    std::cin >> FirstRoll;
+                    FirstRoll = InputValidator::ReadIntegerInput("Enter first Roll Score for Frame Number", 0,i);
 
                     InputValidator::ValidateInputRolls(FirstRoll);
 
@@ -50,16 +48,45 @@ void UserInput::InputRolls(std::vector<std::vector<int>>& objRolls)
 
                     if (FirstRoll != 10)
                     {
-                        std::cout << "Enter 2nd Roll Score" << std::endl;
-                        std::cin >> SecondRoll;
+                        while (retryCount < maxRetries) 
+                        {
+                            try 
+                            {
+                                SecondRoll = InputValidator::ReadIntegerInput("Enter 2nd Roll Score for Frame Number", 0,i);
 
-                        InputValidator::ValidateInputRolls(SecondRoll);
+                                InputValidator::ValidateInputRolls(SecondRoll);             
+                                InputValidator::ValidateInputFrameSum(FirstRoll, SecondRoll); 
+                                objPins.emplace_back(SecondRoll);
+                                break; // Valid input, exit loop
+                            }
+                            catch (const NonNumericException& ex)
+                            {
+                                std::cerr << "Too many invalid attempts for non numeric input. Exiting...\n";
+                                throw std::runtime_error("Failed to get valid nin numberic input after multiple retries.");
+                            }
+                            catch (const InvalidInputException& e)
+                            {
+                                std::cerr << "Invalid roll value: " << e.what() << std::endl;
+                                retryCount++;
+                            }
+                            catch (const InvalidFrameCalculationException& e) 
+                            {
+                                std::cerr << "Invalid frame score: " << e.what() << std::endl;
+                                retryCount++;
+                            }
+                            catch (const std::exception& e) 
+                            {
+                                std::cerr << "Unexpected error: " << e.what() << std::endl;
+                                retryCount++;
+                            }
 
-                        InputValidator::ValidateInputFrameSum(FirstRoll, SecondRoll);
+                            if (retryCount >= maxRetries)
+                            {
+                                std::cerr << "Too many invalid attempts. Exiting...\n";
+                                throw std::runtime_error("Failed to get valid 2nd roll input after multiple retries.");
+                            }
+                        }
 
-                        //objValidator.ValidateRollSizeForFrame(objPins.size()); //To check if frame has 2 rolls proper
-
-                        objPins.emplace_back(SecondRoll);
                     }
 
                     objRolls.emplace_back(objPins);
@@ -67,25 +94,60 @@ void UserInput::InputRolls(std::vector<std::vector<int>>& objRolls)
                 }
                 else if (i == 10)
                 {
-                    std::cout << "Inside 10th Frame" << std::endl;
+                    //std::cout << "Inside 10th Frame" << std::endl;
                     int thirdRoll = 0;
 
-                    std::cout << "Enter first Roll Score" << std::endl;
-                    std::cin >> FirstRoll;
+                    FirstRoll = InputValidator::ReadIntegerInput("Enter first Roll Score for Frame Number", 0,i);
 
-                    InputValidator::ValidateInputRolls(SecondRoll);
+                    InputValidator::ValidateInputRolls(FirstRoll);
 
-                    std::cout << "Enter 2nd Roll Score" << std::endl;
-                    std::cin >> SecondRoll;
+                    while (retryCount < maxRetries)
+                    {
+                        try
+                        {
+                            SecondRoll = InputValidator::ReadIntegerInput("Enter 2nd Roll Score for Frame Number", 0,i);
 
-                    InputValidator::ValidateInputRolls(SecondRoll);
+                            InputValidator::ValidateInputRolls(SecondRoll);             
+                            
+                            if (FirstRoll!=10)
+                            {
+                                InputValidator::ValidateInputFrameSum(FirstRoll, SecondRoll); 
+                            }
+                            
+                            break; // Valid input, exit loop
+                        }
+                        catch (const NonNumericException& ex)
+                        {
+                            std::cerr << "Too many invalid attempts for non numeric input. Exiting...\n";
+                            throw std::runtime_error("Failed to get valid nin numberic input after multiple retries.");
+                        }
+                        catch (const InvalidInputException& e)
+                        {
+                            std::cerr << "Invalid roll value: " << e.what() << std::endl;
+                            retryCount++;
+                        }
+                        catch (const InvalidFrameCalculationException& e)
+                        {
+                            std::cerr << "Invalid frame score: " << e.what() << std::endl;
+                            retryCount++;
+                        }
+                        catch (const std::exception& e)
+                        {
+                            std::cerr << "Unexpected error: " << e.what() << std::endl;
+                            retryCount++;
+                        }
 
-                    //objValidator.ValidateInputFrameSum(FirstRoll,SecondRoll);
+                        if (retryCount >= maxRetries)
+                        {
+                            std::cerr << "Too many invalid attempts. Exiting...\n";
+                            throw std::runtime_error("Failed to get valid 2nd roll input after multiple retries.");
+                        }
+                    }
+
 
                     if (FirstRoll == 10 || (FirstRoll + SecondRoll == 10))
                     {
-                        std::cout << "Enter 3rd Roll Score" << std::endl;
-                        std::cin >> thirdRoll;
+                        thirdRoll = InputValidator::ReadIntegerInput("Enter 3rd Roll Score for Frame Number", 0,i);
 
                         InputValidator::ValidateInputRolls(thirdRoll);
 
@@ -95,24 +157,29 @@ void UserInput::InputRolls(std::vector<std::vector<int>>& objRolls)
                 }
 
             }
-
-        catch (const ExceptionRolls& ex)
-        {
-            //std::cerr << ex.what() << std::endl;
-            retryCount++;
-            if (retryCount == maxRetries)
+            catch (const NonNumericException& ex)
             {
-                std::cerr << "Too many invalid attempts. Exiting the game.\n";
-                throw;
-            };
+                std::cerr << "Too many invalid attempts for non numeric input. Exiting...\n";
+                throw std::runtime_error("Failed to get valid nin numberic input after multiple retries.");
+            }
+            catch (const ExceptionRolls& ex)
+            {
+                //std::cerr << ex.what() << std::endl;
+                retryCount++;
+                if (retryCount == maxRetries)
+                {
+                    std::cerr << "Too many invalid attempts. Exiting the game.\n";
+                    throw;
+                }
+
+            }
+
 
         }
-
-        }
-            objPins.clear();
-
+        objPins.clear();
+        retryCount = 0;
         i++;
     }
-    
+
     //std::cout << "All 10 frames rolls input taken" <<std::endl;
 }
